@@ -1,0 +1,3 @@
+package: github.com/odstderek/zkill-cli
+import:
+- package: github.com/urfave/cli
