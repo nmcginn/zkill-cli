@@ -4,4 +4,5 @@ import:
 - package: github.com/fatih/color
   version: ^1.4.1
 - package: github.com/BurntSushi/toml
+- package: gopkg.in/check.v1
 - package: gopkg.in/yaml.v2
