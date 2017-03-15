@@ -32,7 +32,13 @@ func main() {
 		},
 	}
 
-	//app.Flags = []cli.Flag {}
+	app.Flags = []cli.Flag {
+		cli.BoolFlag{
+			Name: "insecure",
+			Usage: "Skip SSL validation for corporate networks",
+			Hidden: true,
+		},
+	}
 
 	err := app.Run(os.Args)
 	if err != nil {

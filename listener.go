@@ -1,6 +1,7 @@
 package main
 
 import(
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
@@ -17,6 +18,10 @@ func listener(c *cli.Context) error {
 	client := http.Client {
 		// be patient, there may be bursts of activity
 		Timeout: time.Duration(30 * time.Second),
+	}
+	if c.GlobalBool("insecure") {
+		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify:true}}
+		client.Transport = tr
 	}
 	for {
 		//fmt.Println("request")
