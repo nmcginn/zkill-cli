@@ -3,5 +3,5 @@ import:
 - package: gopkg.in/urfave/cli.v1
 - package: github.com/fatih/color
   version: ^1.4.1
-# travis dependencies
 - package: github.com/BurntSushi/toml
+- package: gopkg.in/yaml.v2
