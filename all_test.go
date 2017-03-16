@@ -11,7 +11,7 @@ import (
 func TestDeserialization(t *testing.T) {
 	api_url := "https://redisq.zkillboard.com/listen.php"
 	client := http.Client{
-		Timeout: time.Duration(10 * time.Second),
+		Timeout: time.Duration(20 * time.Second),
 	}
 	resp, err := client.Get(api_url)
 	if err != nil {

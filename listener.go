@@ -16,7 +16,7 @@ func listener(c *cli.Context) error {
 	var zkb zKill
 
 	client := http.Client{
-		Timeout: time.Duration(10 * time.Second),
+		Timeout: time.Duration(20 * time.Second),
 	}
 	if c.GlobalBool("insecure") {
 		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
@@ -94,6 +94,29 @@ func printKill(z zKill, c *cli.Context) {
 	}
 }
 
+type zChar struct {
+	Character *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"character"`
+	Faction *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"faction"`
+	Corporation *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"corporation"`
+	Alliance *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"alliance"`
+	Ship *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"shipType"`
+}
+
 type zKill struct {
 	Payload *struct {
 		KillId   float64 `json:"killID"`
@@ -105,51 +128,8 @@ type zKill struct {
 				Id   float64 `json:"id"`
 				Name string  `json:"name"`
 			} `json:"solarSystem"`
-			Attackers []struct {
-				Character   *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"character"`
-				Faction *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"faction"`
-				Corporation *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"corporation"`
-				Alliance *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"alliance"`
-				Ship *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"shipType"`
-			} `json:"attackers"` // TODO: see if we can strong-type this
-			Victim    *struct {
-				DamageTaken float64 `json:"damageTaken"`
-				Character   *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"character"`
-				Faction *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"faction"`
-				Corporation *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"corporation"`
-				Alliance *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"alliance"`
-				Ship *struct {
-					Id   float64 `json:"id"`
-					Name string  `json:"name"`
-				} `json:"shipType"`
-			} `json:"victim"`
+			Attackers []zChar `json:"attackers"` // TODO: see if we can strong-type this
+			Victim    *zChar  `json:"victim"`
 		} `json:"killmail"`
 		Zkb *struct {
 			Value  float64 `json:"totalValue"`
