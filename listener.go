@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -15,12 +15,11 @@ func listener(c *cli.Context) error {
 	api_url := "https://redisq.zkillboard.com/listen.php"
 	var zkb map[string]interface{}
 
-	client := http.Client {
-		// be patient, there may be bursts of activity
-		Timeout: time.Duration(30 * time.Second),
+	client := http.Client{
+		Timeout: time.Duration(10 * time.Second),
 	}
 	if c.GlobalBool("insecure") {
-		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify:true}}
+		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 		client.Transport = tr
 	}
 	for {
@@ -83,7 +82,7 @@ func printKill(zkb map[string]interface{}, c *cli.Context) {
 		}
 	}
 
-	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n",alliance,ship,value)
+	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", alliance, ship, value)
 	if alliance == c.String("alliance") {
 		color.Red(print_str)
 	} else if kb_green {
@@ -95,3 +94,24 @@ func printKill(zkb map[string]interface{}, c *cli.Context) {
 	}
 }
 
+type zKill struct {
+	Payload struct {
+		KillId   float64 `json:"killID"`
+		Killmail struct {
+			KillId        float64 `json:"killID"`
+			KillTime      string  `json:"killTime"`
+			AttackerCount float64 `json:"attackerCount"`
+			SolarSystem   struct {
+				Id   float64 `json:"id"`
+				Name string  `json:"name"`
+			} `json:"solarSystem"`
+			Attackers []interface{}          `json:"attackers"` // TODO: see if we can strong-type this
+			Victim    map[string]interface{} `json:"victim"`
+		} `json:"killmail"`
+		Zkb struct {
+			Value  float64 `json:"totalValue"`
+			Points float64 `json:"points"`
+			Npc    bool    `json:"npc"`
+		} `json:"zkb"`
+	} `json:"package"`
+}
