@@ -27,6 +27,9 @@ func TestDeserialization(t *testing.T) {
 
 	err = json.Unmarshal(response_bytes, &kill)
 
+	if kill.Payload == nil {
+		t.Skip("zKill returned no kill info, please run test later.")
+	}
 	if kill.Payload.KillId == 0 {
 		t.Error("JSON did not deserialize, KillId was 0.")
 	}
