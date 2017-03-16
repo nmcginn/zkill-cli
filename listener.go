@@ -1,6 +1,6 @@
 package main
 
-import(
+import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -13,14 +13,13 @@ import(
 
 func listener(c *cli.Context) error {
 	api_url := "https://redisq.zkillboard.com/listen.php"
-	var zkb map[string]interface{}
+	var zkb zKill
 
-	client := http.Client {
-		// be patient, there may be bursts of activity
-		Timeout: time.Duration(30 * time.Second),
+	client := http.Client{
+		Timeout: time.Duration(20 * time.Second),
 	}
 	if c.GlobalBool("insecure") {
-		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify:true}}
+		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 		client.Transport = tr
 	}
 	for {
@@ -43,38 +42,38 @@ func listener(c *cli.Context) error {
 	return nil
 }
 
-func printKill(zkb map[string]interface{}, c *cli.Context) {
+func printKill(z zKill, c *cli.Context) {
 	// first check to make sure we got a populated, valid kill
-	if zkb["package"] == nil {
+	if z.Payload == nil {
 		return // not much else to do, redis occasionally returns nils instead of holding the connection
 	}
-	kill := zkb["package"].(map[string]interface{})
-	km := kill["killmail"].(map[string]interface{})
-	zkb = kill["zkb"].(map[string]interface{})
-	victim := km["victim"].(map[string]interface{})
+	kill := z.Payload
+	km := kill.Killmail
+	zkb := kill.Zkb
+	victim := km.Victim
 
 	// items to print
-	ship := victim["shipType"].(map[string]interface{})["name"].(string)
-	alliance := victim["corporation"].(map[string]interface{})["name"].(string)
-	if victim["alliance"] != nil {
-		alliance = victim["alliance"].(map[string]interface{})["name"].(string)
+	alliance := ""
+	if victim.Corporation != nil {
+		alliance = victim.Corporation.Name
 	}
-	value := zkb["totalValue"].(float64)
+	if victim.Alliance != nil {
+		alliance = victim.Alliance.Name
+	}
 
 	kb_green := false
-	attackers := km["attackers"].([]interface{})
-	for i, _ := range attackers {
-		attacker := attackers[i].(map[string]interface{})
+	for i, _ := range km.Attackers {
+		attacker := km.Attackers[i]
 		var attacker_corp string
 
-		if attacker["faction"] != nil {
-			attacker_corp = attacker["faction"].(map[string]interface{})["name"].(string)
+		if attacker.Faction != nil {
+			attacker_corp = attacker.Faction.Name
 		}
-		if attacker["corporation"] != nil {
-			attacker_corp = attacker["corporation"].(map[string]interface{})["name"].(string)
+		if attacker.Corporation != nil {
+			attacker_corp = attacker.Corporation.Name
 		}
-		if attacker["alliance"] != nil {
-			attacker_corp = attacker["alliance"].(map[string]interface{})["name"].(string)
+		if attacker.Alliance != nil {
+			attacker_corp = attacker.Alliance.Name
 		}
 
 		if attacker_corp == alliance {
@@ -83,15 +82,59 @@ func printKill(zkb map[string]interface{}, c *cli.Context) {
 		}
 	}
 
-	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n",alliance,ship,value)
+	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", alliance, victim.Ship.Name, zkb.Value)
 	if alliance == c.String("alliance") {
 		color.Red(print_str)
 	} else if kb_green {
 		color.Green(print_str)
-	} else if value >= c.Float64("isk-threshhold") {
+	} else if zkb.Value >= c.Float64("isk-threshhold") {
 		color.Cyan(print_str)
 	} else {
 		color.White(print_str)
 	}
 }
 
+type zChar struct {
+	Character *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"character"`
+	Faction *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"faction"`
+	Corporation *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"corporation"`
+	Alliance *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"alliance"`
+	Ship *struct {
+		Id   float64 `json:"id"`
+		Name string  `json:"name"`
+	} `json:"shipType"`
+}
+
+type zKill struct {
+	Payload *struct {
+		KillId   float64 `json:"killID"`
+		Killmail *struct {
+			KillId        float64 `json:"killID"`
+			KillTime      string  `json:"killTime"`
+			AttackerCount float64 `json:"attackerCount"`
+			SolarSystem   *struct {
+				Id   float64 `json:"id"`
+				Name string  `json:"name"`
+			} `json:"solarSystem"`
+			Attackers []zChar `json:"attackers"` // TODO: see if we can strong-type this
+			Victim    *zChar  `json:"victim"`
+		} `json:"killmail"`
+		Zkb *struct {
+			Value  float64 `json:"totalValue"`
+			Points float64 `json:"points"`
+			Npc    bool    `json:"npc"`
+		} `json:"zkb"`
+	} `json:"package"`
+}
