@@ -53,25 +53,27 @@ func printKill(z zKill, c *cli.Context) {
 	victim := km.Victim
 
 	// items to print
-	ship := victim["shipType"].(map[string]interface{})["name"].(string)
-	alliance := victim["corporation"].(map[string]interface{})["name"].(string)
-	if victim["alliance"] != nil {
-		alliance = victim["alliance"].(map[string]interface{})["name"].(string)
+	alliance := ""
+	if victim.Corporation != nil {
+		alliance = victim.Corporation.Name
+	}
+	if victim.Alliance != nil {
+		alliance = victim.Alliance.Name
 	}
 
 	kb_green := false
 	for i, _ := range km.Attackers {
-		attacker := km.Attackers[i].(map[string]interface{})
+		attacker := km.Attackers[i]
 		var attacker_corp string
 
-		if attacker["faction"] != nil {
-			attacker_corp = attacker["faction"].(map[string]interface{})["name"].(string)
+		if attacker.Faction != nil {
+			attacker_corp = attacker.Faction.Name
 		}
-		if attacker["corporation"] != nil {
-			attacker_corp = attacker["corporation"].(map[string]interface{})["name"].(string)
+		if attacker.Corporation != nil {
+			attacker_corp = attacker.Corporation.Name
 		}
-		if attacker["alliance"] != nil {
-			attacker_corp = attacker["alliance"].(map[string]interface{})["name"].(string)
+		if attacker.Alliance != nil {
+			attacker_corp = attacker.Alliance.Name
 		}
 
 		if attacker_corp == alliance {
@@ -80,7 +82,7 @@ func printKill(z zKill, c *cli.Context) {
 		}
 	}
 
-	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", alliance, ship, zkb.Value)
+	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", alliance, victim.Ship.Name, zkb.Value)
 	if alliance == c.String("alliance") {
 		color.Red(print_str)
 	} else if kb_green {
@@ -103,8 +105,51 @@ type zKill struct {
 				Id   float64 `json:"id"`
 				Name string  `json:"name"`
 			} `json:"solarSystem"`
-			Attackers []interface{}          `json:"attackers"` // TODO: see if we can strong-type this
-			Victim    map[string]interface{} `json:"victim"`
+			Attackers []struct {
+				Character   *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"character"`
+				Faction *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"faction"`
+				Corporation *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"corporation"`
+				Alliance *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"alliance"`
+				Ship *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"shipType"`
+			} `json:"attackers"` // TODO: see if we can strong-type this
+			Victim    *struct {
+				DamageTaken float64 `json:"damageTaken"`
+				Character   *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"character"`
+				Faction *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"faction"`
+				Corporation *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"corporation"`
+				Alliance *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"alliance"`
+				Ship *struct {
+					Id   float64 `json:"id"`
+					Name string  `json:"name"`
+				} `json:"shipType"`
+			} `json:"victim"`
 		} `json:"killmail"`
 		Zkb *struct {
 			Value  float64 `json:"totalValue"`
