@@ -53,12 +53,12 @@ func printKill(z zKill, c *cli.Context) {
 	victim := km.Victim
 
 	// items to print
-	alliance := ""
+	victim_alliance := ""
 	if victim.Corporation != nil {
-		alliance = victim.Corporation.Name
+		victim_alliance = victim.Corporation.Name
 	}
 	if victim.Alliance != nil {
-		alliance = victim.Alliance.Name
+		victim_alliance = victim.Alliance.Name
 	}
 
 	kb_green := false
@@ -76,14 +76,14 @@ func printKill(z zKill, c *cli.Context) {
 			attacker_corp = attacker.Alliance.Name
 		}
 
-		if attacker_corp == alliance {
+		if attacker_corp == c.String("alliance") {
 			kb_green = true
 			break
 		}
 	}
 
-	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", alliance, victim.Ship.Name, zkb.Value)
-	if alliance == c.String("alliance") {
+	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", victim_alliance, victim.Ship.Name, zkb.Value)
+	if victim_alliance == c.String("alliance") {
 		color.Red(print_str)
 	} else if kb_green {
 		color.Green(print_str)
@@ -94,7 +94,7 @@ func printKill(z zKill, c *cli.Context) {
 	}
 
 	if c.GlobalBool("log") {
-		log_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed: https://zkillboard.com/kill/%.f/\n", alliance, victim.Ship.Name, zkb.Value, kill.KillId)
+		log_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed: https://zkillboard.com/kill/%.f/\n", victim_alliance, victim.Ship.Name, zkb.Value, kill.KillId)
 		file, err := os.OpenFile(os.Getenv("HOME")+"/zkill.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err.Error())
