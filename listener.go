@@ -83,6 +83,11 @@ func printKill(z zKill, c *cli.Context) {
 	}
 
 	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", victim_alliance, victim.Ship.Name, zkb.Value)
+	log_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed: https://zkillboard.com/kill/%.f/\n", victim_alliance, victim.Ship.Name, zkb.Value, kill.KillId)
+	if c.Bool("verbose") {
+		print_str = log_str
+	}
+
 	if victim_alliance == c.String("alliance") {
 		color.Red(print_str)
 	} else if kb_green {
@@ -93,8 +98,7 @@ func printKill(z zKill, c *cli.Context) {
 		color.White(print_str)
 	}
 
-	if c.GlobalBool("log") {
-		log_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed: https://zkillboard.com/kill/%.f/\n", victim_alliance, victim.Ship.Name, zkb.Value, kill.KillId)
+	if c.Bool("log") {
 		file, err := os.OpenFile(os.Getenv("HOME")+"/zkill.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v", err.Error())

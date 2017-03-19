@@ -28,6 +28,14 @@ func main() {
 				Usage:  "User corporation/alliance",
 				EnvVar: "ALLIANCE",
 			},
+			cli.BoolFlag{
+				Name:  "log",
+				Usage: "Turns on logging of all kills",
+			},
+			cli.BoolTFlag{
+				Name:  "verbose",
+				Usage: "Listen output includes zkill URL",
+			},
 		},
 	},
 	}
@@ -37,10 +45,6 @@ func main() {
 			Name:   "insecure",
 			Usage:  "Skip SSL validation for corporate networks",
 			Hidden: true,
-		},
-		cli.BoolFlag{
-			Name:  "log",
-			Usage: "Turns on logging of all kills",
 		},
 	}
 
