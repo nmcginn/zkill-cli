@@ -38,6 +38,10 @@ func main() {
 			Usage:  "Skip SSL validation for corporate networks",
 			Hidden: true,
 		},
+		cli.BoolFlag{
+			Name:  "log",
+			Usage: "Turns on logging of all kills",
+		},
 	}
 
 	err := app.Run(os.Args)

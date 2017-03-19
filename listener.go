@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -23,7 +24,6 @@ func listener(c *cli.Context) error {
 		client.Transport = tr
 	}
 	for {
-		//fmt.Println("request")
 		resp, err := client.Get(api_url)
 		if err != nil {
 			return err
@@ -92,6 +92,16 @@ func printKill(z zKill, c *cli.Context) {
 	} else {
 		color.White(print_str)
 	}
+
+	if c.GlobalBool("log") {
+		log_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed: https://zkillboard.com/kill/%.f/\n", alliance, victim.Ship.Name, zkb.Value, kill.KillId)
+		file, err := os.OpenFile(os.Getenv("HOME")+"/zkill.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v", err.Error())
+		}
+		defer file.Close()
+		file.WriteString(log_str)
+	}
 }
 
 type zChar struct {
@@ -128,7 +138,7 @@ type zKill struct {
 				Id   float64 `json:"id"`
 				Name string  `json:"name"`
 			} `json:"solarSystem"`
-			Attackers []zChar `json:"attackers"` // TODO: see if we can strong-type this
+			Attackers []zChar `json:"attackers"`
 			Victim    *zChar  `json:"victim"`
 		} `json:"killmail"`
 		Zkb *struct {
