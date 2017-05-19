@@ -82,6 +82,13 @@ func printKill(z zKill, c *cli.Context) {
 		}
 	}
 
+	// figure out if printing is necessary (check filters)
+	if (c.String("filter-ship") != "" && victim.Ship != nil && victim.Ship.Name != c.String("filter-ship")) ||
+		(zkb.Value < c.Float64("filter-isk")) ||
+		(c.Bool("filter-alliance") && !kb_green && victim_alliance != c.String("alliance")) {
+		return
+	}
+
 	print_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed\n", victim_alliance, victim.Ship.Name, zkb.Value)
 	log_str := fmt.Sprintf("%v's %v worth %.2f isk was destroyed: https://zkillboard.com/kill/%.f/\n", victim_alliance, victim.Ship.Name, zkb.Value, kill.KillId)
 	if c.Bool("verbose") {

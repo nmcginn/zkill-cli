@@ -17,16 +17,30 @@ func main() {
 		Usage:   "view new kills as they occur",
 		Action:  listener,
 		Flags: []cli.Flag{
-			cli.Float64Flag{
-				Name:  "isk-threshhold, i",
-				Value: 1000000000.0,
-				Usage: "Highlight threshhold for isk amount",
-			},
 			cli.StringFlag{
 				Name:   "alliance, a",
 				Value:  "",
 				Usage:  "User corporation/alliance",
 				EnvVar: "ALLIANCE",
+			},
+			cli.BoolFlag{
+				Name:  "filter-alliance",
+				Usage: "Only show kills involving a corp/alliance",
+			},
+			cli.Float64Flag{
+				Name:  "filter-isk",
+				Value: 0.0,
+				Usage: "Minimum threshhold to display a kill",
+			},
+			cli.StringFlag{
+				Name:  "filter-ship",
+				Value: "",
+				Usage: "Only show specific ships",
+			},
+			cli.Float64Flag{
+				Name:  "isk-threshhold, i",
+				Value: 1000000000.0,
+				Usage: "Highlight threshhold for isk amount",
 			},
 			cli.BoolFlag{
 				Name:  "log",
